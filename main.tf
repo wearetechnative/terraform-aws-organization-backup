@@ -29,7 +29,7 @@ resource "aws_backup_vault" "backupVaultSetup" {
 }
 
 data "template_file" "backup_policy" {
-    template = "./policies/backup-policy"
+    template = file("./policies/backup-policy.json")
     vars = {
         VAULT1 = aws_backup_vault.backupVaultSetup.name
     }
@@ -54,7 +54,7 @@ module "erfgeo_lambda" {
 
   function_name = "erefgeo-backup-policy-enforcer"
   description   = "Set appropriate backup tags on erfgeo resources"
-  handler       = "erfgeo-backup.lambda_handler"
+  handler       = "ebs-backup.lambda_handler"
   runtime       = "python3.9"
   timeout       = 60
 
@@ -83,11 +83,13 @@ data "aws_iam_policy_document" "lambda_extra_permissions" {
 
 # Cloudwatch Events (EventBridge)
 
-resource "aws_cloudwatch_event_rule" "trigger_lambda" {
-  schedule_expression = "rate(1 day)"
-}
+# !!!TURNED OFF FOR TESTING!!!
 
-resource "aws_cloudwatch_event_target" "lambda_target" {
-  rule = "${aws_cloudwatch_event_rule.trigger_lambda.name}"
-  arn  = module.erfgeo_lambda.lambda_function_arn
-}
+# resource "aws_cloudwatch_event_rule" "trigger_lambda" {
+#   schedule_expression = "rate(1 day)"
+# }
+
+# resource "aws_cloudwatch_event_target" "lambda_target" {
+#   rule = "${aws_cloudwatch_event_rule.trigger_lambda.name}"
+#   arn  = module.erfgeo_lambda.lambda_function_arn
+# }

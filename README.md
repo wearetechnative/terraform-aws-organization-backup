@@ -4,6 +4,6 @@
 
 > use the name you have set in ~/.aws/config
 
-backup repository
+AWS Organization BackUp repository
 
 __

@@ -6,6 +6,7 @@ def init_conf():
     global arn
     global region
     arn = os.environ.get('ROLEARN')
+    arn = 'arn:aws:iam::' + arn + ':role/OrganizationAccountAccessRole' 
     region = os.environ.get('REGION')
 
 def assumeCredentials(service_id, role_arn):

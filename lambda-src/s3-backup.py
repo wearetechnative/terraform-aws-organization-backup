@@ -74,9 +74,6 @@ def s3_set_backup_tags(bucketlist, s3):
         tags.append({'Key':'BackupEnabled', 'Value': 'True'})
         bucket_tagging.put(Tagging={'TagSet':tags})
 
-
-        
-
 def lambda_handler(event, context):
     init_conf()
     s3 = assume_role_service_resource(arn, "s3", region)
@@ -89,6 +86,3 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': "OK"
     }
-
-
-lambda_handler("", "")

@@ -1,4 +1,4 @@
-module "lambda_function" {
+module "erfgeo_lambda" {
   source = "terraform-aws-modules/lambda/aws"
   version = "3.3.1"
 
@@ -37,6 +37,6 @@ resource "aws_cloudwatch_event_rule" "trigger_lambda" {
 
 resource "aws_cloudwatch_event_target" "lambda_target" {
   rule = "${aws_cloudwatch_event_rule.trigger_lambda.name}"
-  arn  = module.lambda_function.lambda_function_arn
+  arn  = module.erfgeo_lambda.lambda_function_arn
 }
 

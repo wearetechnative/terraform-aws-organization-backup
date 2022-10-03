@@ -65,6 +65,8 @@ module "erfgeo_lambda" {
   }
 
   environment_variables = {
+    ROLEARN = "444650676521"
+    REGION = "eu-west-1"
   }
   attach_policy_json = true
   policy_json = data.aws_iam_policy_document.lambda_extra_permissions.json

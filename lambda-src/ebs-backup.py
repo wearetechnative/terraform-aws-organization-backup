@@ -1,5 +1,12 @@
 import boto3
+import os
 from botocore.exceptions import ClientError
+
+def init_conf():
+    global arn
+    global region
+    arn = os.environ.get('ROLEARN')
+    region = os.environ.get('REGION')
 
 def assumeCredentials(service_id, role_arn):
     sts = boto3.client('sts')
@@ -55,8 +62,8 @@ def ebs_set_backup_tags(volumelist, ec2):
         )
 
 def lambda_handler(event, context):
-    arn = 'arn:aws:iam::444650676521:role/OrganizationAccountAccessRole'
-    ec2 = assume_role_service_resource(arn, "ec2", "eu-west-1")
+    init_conf()
+    ec2 = assume_role_service_resource(arn, "ec2", region)
     volumes = list_ebs_volumes(ec2)
     volumelist = evaluate_ebs_volume_tags(volumes, ec2)
     ebs_set_backup_tags(volumelist, ec2)

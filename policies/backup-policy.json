@@ -1,6 +1,6 @@
 {
     "plans": {
-        "POC_Backup_plan": {
+        "Backup_plan": {
             "regions": {
                 "@@assign": [
                     "eu-central-1"

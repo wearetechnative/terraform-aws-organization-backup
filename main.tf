@@ -22,10 +22,9 @@ resource "aws_backup_vault" "backupVaultSetup" {
   name = "prod_backup_vault"
   #KMS key selection:
   kms_key_arn = aws_kms_key.createKmsKey.arn
-# Prevents destruction of vault (!!!ENABLE LATER!!!) (DISABLED FOR TESTING)
-#   lifecycle {
-#     prevent_destroy = true
-# } 
+  lifecycle {
+    prevent_destroy = true
+} 
 }
 
 data "template_file" "backup_policy" {
@@ -36,7 +35,7 @@ data "template_file" "backup_policy" {
 }
 
 resource "aws_organizations_policy" "setBackupPolicy" {
-  name = "BackupPolicy"
+  name = "sandboxbackup"
   type = "BACKUP_POLICY"
 
   content = "${data.template_file.backup_policy.rendered}"
@@ -72,6 +71,54 @@ module "erfgeo_lambda" {
   policy_json = data.aws_iam_policy_document.lambda_extra_permissions.json
 }
 
+module "taskhero_s3_lambda" {
+  source = "terraform-aws-modules/lambda/aws"
+  version = "3.3.1"
+
+  function_name = "taskhero-s3-backup-policy-enforcer"
+  description   = "Set appropriate backup tags on taskhero s3 resources"
+  handler       = "s3-backup.lambda_handler"
+  runtime       = "python3.9"
+  timeout       = 60
+
+  source_path =  "./lambda-src/s3-backup.py"
+
+  publish = true
+  allowed_triggers = {
+  }
+
+  environment_variables = {
+    ROLEARN = "873597261799"
+    REGION = "eu-west-1"
+  }
+  attach_policy_json = true
+  policy_json = data.aws_iam_policy_document.lambda_extra_permissions.json
+}
+
+module "taskhero_ebs_lambda" {
+  source = "terraform-aws-modules/lambda/aws"
+  version = "3.3.1"
+
+  function_name = "taskhero-ebs-backup-policy-enforcer"
+  description   = "Set appropriate backup tags on taskhero ebs resources"
+  handler       = "ebs-backup.lambda_handler"
+  runtime       = "python3.9"
+  timeout       = 60
+
+  source_path =  "./lambda-src/ebs-backup.py"
+
+  publish = true
+  allowed_triggers = {
+  }
+
+  environment_variables = {
+    ROLEARN = "873597261799"
+    REGION = "eu-west-1"
+  }
+  attach_policy_json = true
+  policy_json = data.aws_iam_policy_document.lambda_extra_permissions.json
+}
+
 # lambda permissions
 
 data "aws_iam_policy_document" "lambda_extra_permissions" {
@@ -83,13 +130,21 @@ data "aws_iam_policy_document" "lambda_extra_permissions" {
 
 # Cloudwatch Events (EventBridge)
 
-# !!!TURNED OFF FOR TESTING!!!
+resource "aws_cloudwatch_event_rule" "trigger_lambda" {
+  schedule_expression = "rate(1 day)"
+}
 
-# resource "aws_cloudwatch_event_rule" "trigger_lambda" {
-#   schedule_expression = "rate(1 day)"
-# }
+resource "aws_cloudwatch_event_target" "lambda_target" {
+  rule = "${aws_cloudwatch_event_rule.trigger_lambda.name}"
+  arn  = module.erfgeo_lambda.lambda_function_arn
+}
 
-# resource "aws_cloudwatch_event_target" "lambda_target" {
-#   rule = "${aws_cloudwatch_event_rule.trigger_lambda.name}"
-#   arn  = module.erfgeo_lambda.lambda_function_arn
-# }
+resource "aws_cloudwatch_event_target" "lambda_target_taskhero_s3" {
+  rule = "${aws_cloudwatch_event_rule.trigger_lambda.name}"
+  arn  = module.taskhero_s3_lambda.lambda_function_arn
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target_taskhero_ebs" {
+  rule = "${aws_cloudwatch_event_rule.trigger_lambda.name}"
+  arn  = module.taskhero_ebs_lambda.lambda_function_arn
+}

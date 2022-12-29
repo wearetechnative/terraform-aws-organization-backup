@@ -5,7 +5,7 @@ locals {
                 "rules": {
                     # overlapping backup schedules to make costs predictable and backups consistent
                     "001_7DayRule": merge({
-                        "schedule_expression": {"@@assign": "cron(50 * ? * * *)"}, # daily at 05:50
+                        "schedule_expression": {"@@assign": "cron(50 5 ? * * *)"}, # daily at 05:50
                         "target_backup_vault_name": {"@@assign": module.backup_vault.backup_vault_name },
                         "start_backup_window_minutes": {"@@assign": "300"}, # daily backups at most so ok, avoid collisions with RDS / FSx
                         "complete_backup_window_minutes": {"@@assign": "2880"}, # max 2 days then fail

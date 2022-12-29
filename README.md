@@ -107,6 +107,35 @@ resource "aws_iam_service_linked_role" "backup_service_linked_role" {
 
 This modules requires KMS access for the role `role/aws-service-role/backup.amazonaws.com/AWSServiceRoleForBackup`. Our KMS key has these policies.
 
+Enable all resources for *each region* in the *management account* to make sure that resources are included.
+
+```ruby
+resource "aws_backup_region_settings" "this" {
+  resource_type_opt_in_preference = {
+    "Aurora" = true,
+    "CloudFormation" = true,
+    "DocumentDB" = true,
+    "DynamoDB" = true,
+    "EBS" = true,
+    "EC2" = true,
+    "EFS" = true,
+    "FSx" = true,
+    "Neptune" = true,
+    "RDS" = true,
+    "Redshift" = true,
+    "S3" = true,
+    "Storage Gateway" = true,
+    "Timestream" = true,
+    "VirtualMachine" = true
+  }
+
+  resource_type_management_preference = {
+    "DynamoDB" = true
+    "EFS"      = true
+  }
+}
+```
+
 ### Known issues
 
 Initial creation could results in errors like below. Retry again to resolve.

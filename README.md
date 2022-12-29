@@ -70,6 +70,10 @@ This module implements ...
 
 ## How does it work
 
+### Known (major) limitations
+
+Currently only tested and developed on cross-account setups within the same region. Cross-account and cross-region combined should be possible as well.
+
 ### Requirements
 
 This module requires at least the following Terraform configuration on the management account.
@@ -119,13 +123,7 @@ Initial creation could results in errors like below. Retry again to resolve.
 
 ## Usage
 
-To use this module ...
-
-```hcl
-{
-  some_conf = "might need explanation"
-}
-```
+To use this module see the ./examples directory for the 2 main workflows.
 
 <!-- BEGIN_TF_DOCS -->
 <!-- END_TF_DOCS -->

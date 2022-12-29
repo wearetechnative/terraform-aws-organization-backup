@@ -33,6 +33,7 @@ module "kms_backup_vault" {
   resource_policy_additions = jsondecode(data.aws_iam_policy_document.backup_vault_kms_external_account.json)
 }
 
+# this policy is required so Terraform can set the proper grants on the KMS
 data "aws_iam_policy_document" "backup_vault_kms_external_account" {
   statement {
     sid = "Allow <customer> OrganizationAccountAccessRole to setup KMS key for AWS Backup Vault using external KMS key."

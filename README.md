@@ -70,7 +70,52 @@ This module implements ...
 
 ## How does it work
 
-...
+### Requirements
+
+This module requires at least the following Terraform configuration on the management account.
+
+```ruby
+resource "aws_organizations_organization" "this" {
+  aws_service_access_principals = [ "backup.amazonaws.com" ]
+
+  enabled_policy_types = [ "BACKUP_POLICY" ]
+}
+```
+
+When `enable_external_vault` is `true` then make sure that the provider `aws.external_vault` is set and from the *same* region as the AWS account.
+
+When the `backup_vault_kms_key_arn` is in another account make sure that any providers that create vaults have access to this KMS key. Required permissions:
+- kms:CreateGrant
+- kms:GenerateDataKey
+- kms:Decrypt
+- kms:RetireGrant
+- kms:DescribeKey
+
+This requirement can be automated once Terraform `aws_kms_grant` supports service principals. See [issue 13994](https://github.com/hashicorp/terraform-provider-aws/issues/13994) for this (please upvote!).
+
+All accounts with vaults must have the `AWSServiceRoleForBackup` service linked role. This can be created in Terraform with:
+
+```ruby
+resource "aws_iam_service_linked_role" "backup_service_linked_role" {
+  aws_service_name = "backup.amazonaws.com"
+}
+```
+
+This modules requires KMS access for the role `role/aws-service-role/backup.amazonaws.com/AWSServiceRoleForBackup`. Our KMS key has these policies.
+
+### Known issues
+
+Initial creation could results in errors like below. Retry again to resolve.
+
+╷
+│ Error: error creating Backup Vault Lock Configuration (name): AccessDeniedException: 
+│       status code: 403, request id: 44cfe1e4-7aab-4c95-b142-9e600b278916
+│ 
+│   with module.organization_backup.module.backup_vault_external[0].aws_backup_vault_lock_configuration.this,
+│   on modules/aws-organization-backup/backup_vault/main.tf line 10, in resource "aws_backup_vault_lock_configuration" "this":
+│   10: resource "aws_backup_vault_lock_configuration" "this" {
+│ 
+╵
 
 ## Usage
 

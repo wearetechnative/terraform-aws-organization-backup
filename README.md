@@ -1,5 +1,9 @@
 > START INSTRUCTION FOR TECHNATIVE ENGINEERS
 
+TODO: Implement remainder of these instructions in Github. Keep instructions here to make sure they are being processed someday.
+- Most of the data is here but I need to go through all of it again.
+- We are still developing it for other customers, so keep it private for now.
+
 # terraform-aws-module-template
 
 Template for creating a new TerraForm AWS Module. For TechNative Engineers.
@@ -150,9 +154,15 @@ Initial creation could results in errors like below. Retry again to resolve.
 │ 
 ╵
 
+Sometimes it looks like AWS Backup is not working but it simply could take hours(!) before something happens.
+
+Enable AWS EventBridge rules on `aws.backup` to closely monitor events and issues since you can also see CloudTrail events.
+
 ## Usage
 
 To use this module see the ./examples directory for the 2 main workflows.
+
+*ALWAYS* make sure you see your resources in 'Protected Resources' before assuming that the backup plan is correctly configured.
 
 <!-- BEGIN_TF_DOCS -->
 <!-- END_TF_DOCS -->

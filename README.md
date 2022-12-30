@@ -64,11 +64,13 @@ publication, you can publish a first version.
 > END INSTRUCTION FOR TECHNATIVE ENGINEERS
 
 
-# Terraform AWS [Module Name] ![](https://img.shields.io/github/workflow/status/TechNative-B-V/terraform-aws-module-name/Lint?style=plastic)
+# Terraform AWS [aws-organization-backup]
 
 <!-- SHIELDS -->
 
-This module implements ...
+This module implements a standard `AWS Backup` setup using `AWS Organizaion` backup policies for enforcement.
+
+The module is currently tested for single vault and cross-account same region setups only. Cross-account and cross-region should be easy to implement.
 
 [![](we-are-technative.png)](https://www.technative.nl)
 
@@ -76,7 +78,7 @@ This module implements ...
 
 ### Known (major) limitations
 
-Currently only tested and developed on cross-account setups within the same region. Cross-account and cross-region combined should be possible as well.
+Currently only tested and developed on cross-account within the same region or single vault setups. Cross-account and cross-region combined should be possible as well but needs testing / more work.
 
 ### Requirements
 
@@ -144,15 +146,15 @@ resource "aws_backup_region_settings" "this" {
 
 Initial creation could results in errors like below. Retry again to resolve.
 
-╷
-│ Error: error creating Backup Vault Lock Configuration (name): AccessDeniedException: 
-│       status code: 403, request id: 44cfe1e4-7aab-4c95-b142-9e600b278916
-│ 
-│   with module.organization_backup.module.backup_vault_external[0].aws_backup_vault_lock_configuration.this,
-│   on modules/aws-organization-backup/backup_vault/main.tf line 10, in resource "aws_backup_vault_lock_configuration" "this":
-│   10: resource "aws_backup_vault_lock_configuration" "this" {
-│ 
-╵
+\╷
+\│ Error: error creating Backup Vault Lock Configuration (name): AccessDeniedException: 
+\│       status code: 403, request id: 44cfe1e4-7aab-4c95-b142-9e600b278916
+\│ 
+\│   with module.organization_backup.module.backup_vault_external[0].aws_backup_vault_lock_configuration.this,
+\│   on modules/aws-organization-backup/backup_vault/main.tf line 10, in resource "aws_backup_vault_lock_configuration" "this":
+\│   10: resource "aws_backup_vault_lock_configuration" "this" {
+\│ 
+\╵
 
 Sometimes it looks like AWS Backup is not working but it simply could take hours(!) before something happens.
 

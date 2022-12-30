@@ -154,7 +154,7 @@ Initial creation could results in errors like below. Retry again to resolve.
 │   on modules/aws-organization-backup/backup_vault/main.tf line 10, in resource "aws_backup_vault_lock_configuration" "this":\
 │   10: resource "aws_backup_vault_lock_configuration" "this" {\
 │\
-╵\
+╵
 
 Sometimes it looks like AWS Backup is not working but it simply could take hours(!) before something happens.
 

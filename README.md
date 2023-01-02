@@ -1,133 +1,175 @@
-# AWS Organization BackUp repo
+> START INSTRUCTION FOR TECHNATIVE ENGINEERS
 
-## use this script in combination with `export AWS_PROFILE={technative management role name }` to upload the code to the management account
+TODO: Implement remainder of these instructions in Github. Keep instructions here to make sure they are being processed someday.
+- Most of the data is here but I need to go through all of it again.
+- We are still developing it for other customers, so keep it private for now.
 
-> use the name you have set in ~/.aws/config
+# terraform-aws-module-template
 
-AWS Organization BackUp repository
+Template for creating a new TerraForm AWS Module. For TechNative Engineers.
 
-__
+## Instructions
 
-## backup-policy.json
+### Your Module Name
 
-Our backup policy currently has 1 backup rule.
+Think hard and come up with the shortest descriptive name for your module.
+Look at competition in the [terraform
+registry](https://registry.terraform.io/).
 
-The policy targets all resources with the tag `BackupEnabled: True` within the sandbox organization unit.
+Your module name should be max. three words seperated by dashes. E.g.
 
-It backs up all targeted resources everyday and keeps the backups for 1 month (28 days) before it deletes.
+- html-form-action
+- new-account-notifier
+- budget-alarms
+- fix-missing-tags
 
-The backup gets initiated at 7 am UTC everyday 
+### Setup Github Project
 
->⚠️WARNING⚠️ **This does not mean it will be backup up at that time backups can take 60-1440 minutes to take effect**
+1. Click the template button on the top right...
+1. Name github project `terraform-aws-[your-module-name]`
+1. Make project private untill ready for publication
+1. Add a description in the `About` section (top right)
+1. Add tags: `terraform`, `terraform-module`, `aws` and more tags relevant to your project: e.g. `s3`, `lambda`, `sso`, etc..
+1. Install `pre-commit`
 
-the backup will be saved in the PRODVAULT on the management account
+### Develop your module
 
-## ebs-backup.py
+1. Develop your module
+1. Try to use the [best practices for TerraForm
+   development](https://www.terraform-best-practices.com/) and [TerraForm AWS
+   Development](https://github.com/ozbillwang/terraform-best-practices).
 
-### lambda_handler()
+## Finish project documentation
 
-initiates the lambda function
+1. Set well written title
+2. Add one or more shields
+3. Start readme with a short and complete as possible module description. This
+   is the part where you sell your module.
+4. Complete README with well written documentation. Try to think as a someone
+   with three months of Terraform experience.
+5. Check if pre-commit correctly generates the standard Terraform documentation.
 
-### init_conf()
+## Publish module
 
-makes sure the `arn` and `region` are properly imported and formatted
+If your module is in a state that it could be useful for others and ready for
+publication, you can publish a first version.
 
+1. Create a [Github
+   Release](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)
+2. Publish in the TerraForm Registry under the Technative Namespace (the GitHub
+   Repo must be in the TechNative Organization)
 
-### assume_role_service_resource()
+---
 
-Changes role to the correct account, resource & region, and returns the client/resource
-
-
-### list_ebs_volumes()
-
-makes a list of all EBS volumes in selected accounts region 
-
-###  evaluate_ebs_volume_tags()
-
-Parses the name of all EBS resources so it can work with boto 3.
-
-then checks if it already has a BackupEnabled True/False tag if it doesnt it will be added to `volumelist`
-
-### ebs_set_backup_tags
-
-takes the `volumelist` array and adds the tag BackupEnabled: True to all EBS resources listed
-
-## s3-backup.py
-
-### init_conf()
-
-makes sure the `arn` and `region` are properly imported and formatted
-
-### assume_role_service_resource()
-
-Changes role to the correct account, resource & region, and returns the client/resource
-
-### assume_role_service_client()
-
-Changes role to the correct account, resource & region, and returns the client/resource
+> END INSTRUCTION FOR TECHNATIVE ENGINEERS
 
 
-### list_s3_buckets()
+# Terraform AWS [aws-organization-backup]
 
-makes a list of all S3 volumes in selected accounts region 
+<!-- SHIELDS -->
 
-### evaluate_s3_backup_tags()
+This module implements a standard `AWS Backup` setup using `AWS Organizaion` backup policies for enforcement.
 
-Parses the name of all S3 resources so it can work with boto3.
+The module is currently tested for single vault and cross-account same region setups only. Cross-account and cross-region should be easy to implement.
 
-It will scans all tagging information for resource tags.
+[![](we-are-technative.png)](https://www.technative.nl)
 
-Then it will go over all resource tags and checks if it has a `BackupEnabled: True/False` tag
+## How does it work
 
-All resources without the `BackupEnabled: True/False` tag will be added to `bucketlist`
+### Known (major) limitations
 
-### ebs_set_backup_tags
+Currently only tested and developed on cross-account within the same region or single vault setups. Cross-account and cross-region combined should be possible as well but needs testing / more work.
 
-takes the `bucketlist` array and appends the tag BackupEnabled: True to all S3 resources listed within the array
+### Requirements
 
-## main.tf
+- This module requires at least the following Terraform configuration on the management account.
 
-> using aws version ~> 4.0
+```ruby
+resource "aws_organizations_organization" "this" {
+  aws_service_access_principals = [ "backup.amazonaws.com" ]
 
-Uses the management account to upload the policy & lambda functions to our organization
-
-Add resource type to an account:
-
-```tf
-
-module "{MODULE_NAME}" {
-  source = "terraform-aws-modules/lambda/aws"
-  version = "3.3.1"
-
-  function_name = "{ACCOUNT + RESOURCE TYPE}-backup-policy-enforcer"
-  description   = "Set appropriate backup tags on {ACCOUNT + RESOURCE TYPE} resources"
-  handler       = "{MODULE_NAME}.lambda_handler"
-  runtime       = "python3.9"
-  timeout       = 60
-
-  source_path =  "./lambda-src/{LAMBDA_MODULE}.py"
-
-  publish = true
-  allowed_triggers = {
-  }
-
-  environment_variables = {
-    ROLEARN = "{ACCOUNT ID}"
-    REGION = "{REGION}" 
-  }
-  attach_policy_json = true
-  policy_json = data.aws_iam_policy_document.lambda_extra_permissions.json
+  enabled_policy_types = [ "BACKUP_POLICY" ]
 }
+```
 
-current variables:
+- When `enable_external_vault` is `true` then make sure that the provider `aws.external_vault` is set and from the *same* region as the AWS account.
 
-- ROLEARN, Needs the account id and will automatically be parsed into a usable ARN
+- When the `backup_vault_kms_key_arn` is in another account make sure that any providers that create vaults have access to this KMS key. Required permissions:
+  - kms:CreateGrant
+  - kms:GenerateDataKey
+  - kms:Decrypt
+  - kms:RetireGrant
+  - kms:DescribeKey
 
-- REGION, Specifies in which region the lambda will target
+This requirement can be automated once Terraform `aws_kms_grant` supports service principals. See [issue 13994](https://github.com/hashicorp/terraform-provider-aws/issues/13994) for this (please upvote!).
 
-Lambda only requires the STS.AssumeRole.* permission, all action will be done on the target account
+- All accounts with vaults must have the `AWSServiceRoleForBackup` service linked role. This can be created / imported in Terraform with:
 
-Increase time out incase lambda runs out of time
+```ruby
+resource "aws_iam_service_linked_role" "backup_service_linked_role" {
+  aws_service_name = "backup.amazonaws.com"
+}
+```
 
-___
+- This modules requires KMS access for the role `role/aws-service-role/backup.amazonaws.com/AWSServiceRoleForBackup`. Our [KMS key module](https://github.com/TechNative-B-V/modules-aws/commit/9f5d80f00cc477ba57d95b26230913f685e0fae9) has these policies.
 
+- Enable all resources for *each region* in the *management account* to make sure that resources are included.
+
+```ruby
+resource "aws_backup_region_settings" "this" {
+  resource_type_opt_in_preference = {
+    "Aurora" = true,
+    "CloudFormation" = true,
+    "DocumentDB" = true,
+    "DynamoDB" = true,
+    "EBS" = true,
+    "EC2" = true,
+    "EFS" = true,
+    "FSx" = true,
+    "Neptune" = true,
+    "RDS" = true,
+    "Redshift" = true,
+    "S3" = true,
+    "Storage Gateway" = true,
+    "Timestream" = true,
+    "VirtualMachine" = true
+  }
+
+  resource_type_management_preference = {
+    "DynamoDB" = true
+    "EFS"      = true
+  }
+}
+```
+
+### Known issues
+
+Initial creation could results in errors like below. Retry again to resolve.
+
+╷\
+│ Error: error creating Backup Vault Lock Configuration (name): AccessDeniedException:\
+│       status code: 403, request id: 44cfe1e4-7aab-4c95-b142-9e600b278916\
+│\
+│   with module.organization_backup.module.backup_vault_external[0].aws_backup_vault_lock_configuration.this,\
+│   on modules/aws-organization-backup/backup_vault/main.tf line 10, in resource "aws_backup_vault_lock_configuration" "this":\
+│   10: resource "aws_backup_vault_lock_configuration" "this" {\
+│\
+╵
+
+Sometimes it looks like AWS Backup is not working but it simply could take hours(!) before something happens.
+
+Enable AWS EventBridge rules on `aws.backup` to closely monitor events and issues since you can also see CloudTrail events.
+
+## Usage
+
+To use this module see the ./examples directory for the 2 main workflows. External vault indicates a cross-account setup only.
+
+*ALWAYS* make sure you see your resources in 'Protected Resources' before assuming that the backup plan is correctly configured.
+
+## Future work
+
+- Combined cross-account and cross-region. Probably requires seperate KMS keys.
+- Automatic handling of setting up KMS access under different configurations (e.g. KMS per vault location, KMS shared in source vault account, KMS shared in destination vault account).
+
+<!-- BEGIN_TF_DOCS -->
+<!-- END_TF_DOCS -->

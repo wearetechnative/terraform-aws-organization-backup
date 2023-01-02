@@ -1,14 +1,9 @@
-builds/*
 # Local .terraform directories
 **/.terraform/*
-
-# Lock files are not needed since we pin versions in the TerraForm blocks
-**/.terraform.lock.hcl
 
 # .tfstate files
 *.tfstate
 *.tfstate.*
-*.tfvars
 
 # Crash log files
 crash.log
@@ -32,3 +27,5 @@ override.tf.json
 
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
+.temp.html 
+.temp.seed

@@ -4,6 +4,8 @@
 
 This module implements a standard `AWS Backup` setup using `AWS Organizaion` backup policies for enforcement.
 
+Any supported and enabled resource with tag `BackupEnabled` and value `True` will be included.
+
 The module is currently tested for all scenarios except cross-region and cross-account combined. This probably just works or should be easy to implement.
 
 *** Make sure you GUARD or BACKUP your `KMS CMK` keys as `AWS Backup` mostly uses the [original resource KMS CMK key](https://docs.aws.amazon.com/aws-backup/latest/devguide/encryption.html) for encrypting the backups. The best approach is to block `kms:ScheduleKeyDeletion` in an SCP.

@@ -7,8 +7,7 @@ locals {
                     "001_14DayRule": merge({
                         "schedule_expression": {"@@assign": "cron(50 5 ? * * *)"}, # daily at 05:50
                         "target_backup_vault_name": {"@@assign": module.backup_vault.backup_vault_name },
-                        # "start_backup_window_minutes": {"@@assign": "300"}, # daily backups at most so ok, avoid collisions with RDS / FSx
-                        "start_backup_window_minutes": {"@@assign": "60"},
+                        "start_backup_window_minutes": {"@@assign": "300"}, # daily backups at most so ok, avoid collisions with RDS / FSx
                         "complete_backup_window_minutes": {"@@assign": "2880"}, # max 2 days then fail
                         "enable_continuous_backup": {"@@assign": true},
                         "recovery_point_tags": { for k, v in merge(data.aws_default_tags.current.tags, { "Inherited": "True" }) :

@@ -1,76 +1,14 @@
-> START INSTRUCTION FOR TECHNATIVE ENGINEERS
-
-TODO: Implement remainder of these instructions in Github. Keep instructions here to make sure they are being processed someday.
-- Most of the data is here but I need to go through all of it again.
-- We are still developing it for other customers, so keep it private for now.
-
-# terraform-aws-module-template
-
-Template for creating a new TerraForm AWS Module. For TechNative Engineers.
-
-## Instructions
-
-### Your Module Name
-
-Think hard and come up with the shortest descriptive name for your module.
-Look at competition in the [terraform
-registry](https://registry.terraform.io/).
-
-Your module name should be max. three words seperated by dashes. E.g.
-
-- html-form-action
-- new-account-notifier
-- budget-alarms
-- fix-missing-tags
-
-### Setup Github Project
-
-1. Click the template button on the top right...
-1. Name github project `terraform-aws-[your-module-name]`
-1. Make project private untill ready for publication
-1. Add a description in the `About` section (top right)
-1. Add tags: `terraform`, `terraform-module`, `aws` and more tags relevant to your project: e.g. `s3`, `lambda`, `sso`, etc..
-1. Install `pre-commit`
-
-### Develop your module
-
-1. Develop your module
-1. Try to use the [best practices for TerraForm
-   development](https://www.terraform-best-practices.com/) and [TerraForm AWS
-   Development](https://github.com/ozbillwang/terraform-best-practices).
-
-## Finish project documentation
-
-1. Set well written title
-2. Add one or more shields
-3. Start readme with a short and complete as possible module description. This
-   is the part where you sell your module.
-4. Complete README with well written documentation. Try to think as a someone
-   with three months of Terraform experience.
-5. Check if pre-commit correctly generates the standard Terraform documentation.
-
-## Publish module
-
-If your module is in a state that it could be useful for others and ready for
-publication, you can publish a first version.
-
-1. Create a [Github
-   Release](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)
-2. Publish in the TerraForm Registry under the Technative Namespace (the GitHub
-   Repo must be in the TechNative Organization)
-
----
-
-> END INSTRUCTION FOR TECHNATIVE ENGINEERS
-
-
 # Terraform AWS [aws-organization-backup]
 
 <!-- SHIELDS -->
 
 This module implements a standard `AWS Backup` setup using `AWS Organizaion` backup policies for enforcement.
 
-The module is currently tested for single vault and cross-account same region setups only. Cross-account and cross-region should be easy to implement.
+The module is currently tested for all scenarios except cross-region and cross-account combined. This probably just works or should be easy to implement.
+
+*** Make sure you GUARD or BACKUP your `KMS CMK` keys as `AWS Backup` mostly uses the [original resource KMS CMK key](https://docs.aws.amazon.com/aws-backup/latest/devguide/encryption.html) for encrypting the backups. The best approach is to block `kms:ScheduleKeyDeletion` in an SCP.
+
+Simultaneous cross-region and cross-account is [not supported](https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html#features-by-resource) for RDS, Aurora, Neptune and DocumentDB.
 
 [![](we-are-technative.png)](https://www.technative.nl)
 
@@ -78,7 +16,7 @@ The module is currently tested for single vault and cross-account same region se
 
 ### Known (major) limitations
 
-Currently only tested and developed on cross-account within the same region or single vault setups. Cross-account and cross-region combined should be possible as well but needs testing / more work.
+The module is currently tested for all scenarios except cross-region and cross-account combined. This probably just works or should be easy to implement.
 
 ### Requirements
 
@@ -142,6 +80,31 @@ resource "aws_backup_region_settings" "this" {
 }
 ```
 
+- S3 buckets with KMS encrypted objects require that the backup role outputed with `backup_role_arn` have Decrypt, DescribeKey permissions on the KMS key.
+
+Example below with KMS grant.
+
+```ruby
+resource "aws_kms_grant" "s3_appdata" {
+  name              = "aws_backup_${var.name}_s3_appdata"
+  key_id            = data.terraform_remote_state.ddgcstack.outputs.ddgcstack_kms_key_arn
+  grantee_principal = module.organization_backup.backup_role_arn
+  operations        = ["Decrypt", "DescribeKey"]
+}
+```
+
+- RDS instances with KMS encrypted snapshots require that the backup role outputed with `backup_role_arn` have DescribeKey, Decrypt, ReEncryptFrom, ReEncryptTo, CreateGrant, RetireGrant permissions on the KMS key.
+
+```ruby
+resource "aws_kms_grant" "s3_appdata" {
+  name              = "aws_backup_${var.name}_s3_appdata"
+  key_id            = data.terraform_remote_state.ddgcstack.outputs.ddgcstack_kms_key_arn
+  grantee_principal = module.organization_backup.backup_role_arn
+
+  operations        = ["DescribeKey", "Decrypt", "ReEncryptFrom", "ReEncryptTo", "CreateGrant", "RetireGrant"]
+}
+```
+
 ### Known issues
 
 Initial creation could results in errors like below. Retry again to resolve.
@@ -158,11 +121,11 @@ Initial creation could results in errors like below. Retry again to resolve.
 
 Sometimes it looks like AWS Backup is not working but it simply could take hours(!) before something happens.
 
-Enable AWS EventBridge rules on `aws.backup` to closely monitor events and issues since you can also see CloudTrail events.
+Enable AWS EventBridge rules on `aws.backup` to closely monitor events and issues since you can also see CloudTrail events. These events also tend to happen long before anything is visible in the web console.
 
 ## Usage
 
-To use this module see the ./examples directory for the 2 main workflows. External vault indicates a cross-account setup only.
+To use this module see the ./examples directory for the 3 main supported and tested workflows with EBS, S3 and RDS.
 
 *ALWAYS* make sure you see your resources in 'Protected Resources' before assuming that the backup plan is correctly configured.
 

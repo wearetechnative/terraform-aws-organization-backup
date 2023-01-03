@@ -4,10 +4,11 @@ locals {
             "organization_${var.name}": {
                 "rules": {
                     # overlapping backup schedules to make costs predictable and backups consistent
-                    "001_7DayRule": merge({
+                    "001_14DayRule": merge({
                         "schedule_expression": {"@@assign": "cron(50 5 ? * * *)"}, # daily at 05:50
                         "target_backup_vault_name": {"@@assign": module.backup_vault.backup_vault_name },
-                        "start_backup_window_minutes": {"@@assign": "300"}, # daily backups at most so ok, avoid collisions with RDS / FSx
+                        # "start_backup_window_minutes": {"@@assign": "300"}, # daily backups at most so ok, avoid collisions with RDS / FSx
+                        "start_backup_window_minutes": {"@@assign": "60"},
                         "complete_backup_window_minutes": {"@@assign": "2880"}, # max 2 days then fail
                         "enable_continuous_backup": {"@@assign": true},
                         "recovery_point_tags": { for k, v in merge(data.aws_default_tags.current.tags, { "Inherited": "True" }) :
@@ -29,7 +30,7 @@ locals {
                                     }
                                 }
                             } : {})
-                    "002_40DayRule": merge({
+                    "002_42DayRule": merge({
                         "schedule_expression": {"@@assign": "cron(50 5 ? * 2 *)"}, # every week on Monday at 05:50
                         "target_backup_vault_name": {"@@assign": module.backup_vault.backup_vault_name },
                         "start_backup_window_minutes": {"@@assign": "300"}, # daily backups at most so ok, avoid collisions with RDS / FSx
@@ -54,7 +55,7 @@ locals {
                                     }
                                 }
                             } : {})
-                    "003_370DayRule": merge({
+                    "003_420DayRule": merge({
                         "schedule_expression": {"@@assign": "cron(50 5 ? * 2#1 *)"}, # every first Monday at the month at 05:50
                         "target_backup_vault_name": {"@@assign": module.backup_vault.backup_vault_name },
                         "start_backup_window_minutes": {"@@assign": "300"}, # daily backups at most so ok, avoid collisions with RDS / FSx

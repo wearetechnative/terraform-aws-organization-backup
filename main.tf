@@ -37,7 +37,8 @@ resource "aws_kms_grant" "kms_grant_external_vault" {
   key_id            = var.external_backup_vault_kms_key_arn
   grantee_principal = module.iam_role.role_arn
 
-  operations = ["DescribeKey", "Decrypt", "ReEncryptFrom", "ReEncryptTo", "CreateGrant", "RetireGrant"]
+  # todo: probably needs less encrypt privileges but takes time to test
+  operations = ["Decrypt", "Encrypt", "GenerateDataKey", "GenerateDataKeyWithoutPlaintext", "ReEncryptFrom", "ReEncryptTo", "CreateGrant", "RetireGrant", "DescribeKey", "GenerateDataKeyPair", "GenerateDataKeyPairWithoutPlaintext"]
 }
 
 resource "aws_backup_vault_policy" "source_account_to_destination_account_vault_access" {

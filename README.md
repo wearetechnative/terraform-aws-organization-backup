@@ -131,7 +131,7 @@ To use this module see the ./examples directory for the 3 main supported and tes
 
 ## Future work
 
-- Combined cross-account and cross-region. Probably requires seperate KMS keys.
+- Combined  cross-account and cross-region. Probably requires seperate KMS keys.
 - Automatic handling of setting up KMS access under different configurations (e.g. KMS per vault location, KMS shared in source vault account, KMS shared in destination vault account).
 
 <!-- BEGIN_TF_DOCS -->

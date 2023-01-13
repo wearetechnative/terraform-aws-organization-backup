@@ -1,69 +1,3 @@
-> START INSTRUCTION FOR TECHNATIVE ENGINEERS
-
-TODO: Implement remainder of these instructions in Github. Keep instructions here to make sure they are being processed someday.
-- Most of the data is here but I need to go through all of it again.
-- We are still developing it for other customers, so keep it private for now.
-
-# terraform-aws-module-template
-
-Template for creating a new TerraForm AWS Module. For TechNative Engineers.
-
-## Instructions
-
-### Your Module Name
-
-Think hard and come up with the shortest descriptive name for your module.
-Look at competition in the [terraform
-registry](https://registry.terraform.io/).
-
-Your module name should be max. three words seperated by dashes. E.g.
-
-- html-form-action
-- new-account-notifier
-- budget-alarms
-- fix-missing-tags
-
-### Setup Github Project
-
-1. Click the template button on the top right...
-1. Name github project `terraform-aws-[your-module-name]`
-1. Make project private untill ready for publication
-1. Add a description in the `About` section (top right)
-1. Add tags: `terraform`, `terraform-module`, `aws` and more tags relevant to your project: e.g. `s3`, `lambda`, `sso`, etc..
-1. Install `pre-commit`
-
-### Develop your module
-
-1. Develop your module
-1. Try to use the [best practices for TerraForm
-   development](https://www.terraform-best-practices.com/) and [TerraForm AWS
-   Development](https://github.com/ozbillwang/terraform-best-practices).
-
-## Finish project documentation
-
-1. Set well written title
-2. Add one or more shields
-3. Start readme with a short and complete as possible module description. This
-   is the part where you sell your module.
-4. Complete README with well written documentation. Try to think as a someone
-   with three months of Terraform experience.
-5. Check if pre-commit correctly generates the standard Terraform documentation.
-
-## Publish module
-
-If your module is in a state that it could be useful for others and ready for
-publication, you can publish a first version.
-
-1. Create a [Github
-   Release](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)
-2. Publish in the TerraForm Registry under the Technative Namespace (the GitHub
-   Repo must be in the TechNative Organization)
-
----
-
-> END INSTRUCTION FOR TECHNATIVE ENGINEERS
-
-
 # Terraform AWS [aws-organization-backup]
 
 <!-- SHIELDS -->
@@ -76,6 +10,11 @@ The module is currently tested for single vault and cross-account same region se
 
 ## How does it work
 
+AWS Backup works by copying targeted resource's data into s3 storage on a schedule.
+You can select which resources you want to back up with the use of tags. (explained further in ./plan.md).
+The data can be backed up to other regions or AWS accounts.
+AWS Backup integrates with other AWS services, such as AWS Identity and Access Management (IAM) for authentication and Amazon CloudWatch for logging and monitoring.
+
 ### Known (major) limitations
 
 Currently only tested and developed on cross-account within the same region or single vault setups. Cross-account and cross-region combined should be possible as well but needs testing / more work.
@@ -84,7 +23,7 @@ Currently only tested and developed on cross-account within the same region or s
 
 - This module requires at least the following Terraform configuration on the management account.
 
-```ruby
+```json
 resource "aws_organizations_organization" "this" {
   aws_service_access_principals = [ "backup.amazonaws.com" ]
 
@@ -105,7 +44,7 @@ This requirement can be automated once Terraform `aws_kms_grant` supports servic
 
 - All accounts with vaults must have the `AWSServiceRoleForBackup` service linked role. This can be created / imported in Terraform with:
 
-```ruby
+```json
 resource "aws_iam_service_linked_role" "backup_service_linked_role" {
   aws_service_name = "backup.amazonaws.com"
 }
@@ -115,7 +54,7 @@ resource "aws_iam_service_linked_role" "backup_service_linked_role" {
 
 - Enable all resources for *each region* in the *management account* to make sure that resources are included.
 
-```ruby
+```json
 resource "aws_backup_region_settings" "this" {
   resource_type_opt_in_preference = {
     "Aurora" = true,
@@ -170,6 +109,3 @@ To use this module see the ./examples directory for the 2 main workflows. Extern
 
 - Combined cross-account and cross-region. Probably requires seperate KMS keys.
 - Automatic handling of setting up KMS access under different configurations (e.g. KMS per vault location, KMS shared in source vault account, KMS shared in destination vault account).
-
-<!-- BEGIN_TF_DOCS -->
-<!-- END_TF_DOCS -->

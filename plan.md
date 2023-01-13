@@ -2,7 +2,7 @@
 
 The standard backup plan comes with three different  "rules"
 
-For rule parameters see: [Creating a backup plan](https://docs.aws.amazon.com/aws-backup/latest/devguide/creating-a-backup-plan.html)
+For rule parameters see: [Creating a backup plan](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_backup_syntax.html)
 ## Setup
 
 ### 7 day rule

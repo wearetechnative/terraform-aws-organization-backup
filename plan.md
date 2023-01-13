@@ -2,38 +2,7 @@
 
 The standard backup plan comes with three different  "rules"
 
-Rules are defined with the following parametres:
-
-`rule_name` - The name of the backup rule. It should be unique within the backup plan.
-
-`schedule_expression` - This is the freqeuncy the backup expressed in [AWS Schedule Expressions](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html)
-
-`target_backup_vault_name` - The name of the backup vault where the backups will be stored. It should be unique within the AWS account.
-
-`start_backup_window_minutes` - The number of minutes after the scheduled time that a backup is started.
-
-`complete_backup_window_minutes` - The number of minutes after the start backup window that the backup should be completed.
-
-`enable_continuous_backup` - A Boolean flag indicating whether to enable continuous backups or not.
-
-`recovery_point_tags` - A map of tags to add to the recovery point.
-
-`lifecycle` - A map of lifecycle rules applied to backups.
-
-`move_to_cold_storage_after_days` - The number of days after creation that a backup is moved to cold storage.
-
-`delete_after_days` - The number of days after creation that a backup is deleted.
-
-`copy_actions` - A list of maps of copy actions applied to backups.
-
-`target_backup_vault_arn` - The ARN of the backup vault where the copied backup will be stored.
-
-`lifecycle` - A map of lifecycle rules applied to copied backups.
-
-`move_to_cold_storage_after_days` - The number of days after creation that a copied backup is moved to cold storage.
-
-`delete_after_days` - The number of days after creation that a copied backup is deleted.
-
+For rule parameters see: [Creating a backup plan](https://docs.aws.amazon.com/aws-backup/latest/devguide/creating-a-backup-plan.html)
 ## Setup
 
 ### 7 day rule

@@ -18,6 +18,11 @@ Simultaneous cross-region and cross-account is [not supported](https://docs.aws.
 
 ## How does it work
 
+AWS Backup works by copying targeted resource's data into s3 storage on a schedule.
+You can select which resources you want to back up with the use of tags. (explained further in ./plan.md).
+The data can be backed up to other regions or AWS accounts.
+AWS Backup integrates with other AWS services, such as AWS Identity and Access Management (IAM) for authentication and Amazon CloudWatch for logging and monitoring.
+
 ### Known (major) limitations
 
 The module is currently tested for all scenarios except cross-region and cross-account combined. This probably just works or should be easy to implement.
@@ -26,7 +31,7 @@ The module is currently tested for all scenarios except cross-region and cross-a
 
 - This module requires at least the following Terraform configuration on the management account.
 
-```ruby
+```json
 resource "aws_organizations_organization" "this" {
   aws_service_access_principals = [ "backup.amazonaws.com" ]
 
@@ -47,7 +52,7 @@ This requirement can be automated once Terraform `aws_kms_grant` supports servic
 
 - All accounts with vaults must have the `AWSServiceRoleForBackup` service linked role. This can be created / imported in Terraform with:
 
-```ruby
+```json
 resource "aws_iam_service_linked_role" "backup_service_linked_role" {
   aws_service_name = "backup.amazonaws.com"
 }
@@ -57,7 +62,7 @@ resource "aws_iam_service_linked_role" "backup_service_linked_role" {
 
 - Enable all resources for *each region* in the *management account* to make sure that resources are included.
 
-```ruby
+```json
 resource "aws_backup_region_settings" "this" {
   resource_type_opt_in_preference = {
     "Aurora" = true,

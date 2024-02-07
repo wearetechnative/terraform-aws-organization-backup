@@ -3,10 +3,10 @@ module "backup_vault" {
 
   providers = {
     aws = aws
-   }
+  }
 
-  name = var.name
-  kms_key_arn = var.backup_vault_kms_key_arn
+  name            = var.name
+  kms_key_arn     = var.backup_vault_kms_key_arn
   immutable_vault = var.immutable_vault
 }
 
@@ -23,8 +23,8 @@ module "backup_vault_external" {
 
   source = "./backup_vault"
 
-  name = var.name
-  kms_key_arn = local.external_backup_vault_kms_key_arn
+  name            = var.name
+  kms_key_arn     = local.external_backup_vault_kms_key_arn
   immutable_vault = var.immutable_vault
 }
 
@@ -55,7 +55,7 @@ data "aws_iam_policy_document" "source_account_to_destination_account_vault_acce
   statement {
     sid = "Allow source account to access destination account vault."
 
-    actions = [ "backup:CopyIntoBackupVault" ]
+    actions = ["backup:CopyIntoBackupVault"]
 
     principals {
       type        = "AWS"
@@ -68,7 +68,7 @@ data "aws_iam_policy_document" "source_account_to_destination_account_vault_acce
 
 resource "aws_organizations_policy" "this" {
   provider = aws.management
-  
+
   name = var.name
   type = "BACKUP_POLICY"
 
@@ -77,7 +77,7 @@ resource "aws_organizations_policy" "this" {
 
 resource "aws_organizations_policy_attachment" "this" {
   provider = aws.management
-  
+
   policy_id = aws_organizations_policy.this.id
   target_id = data.aws_caller_identity.current.account_id
 }

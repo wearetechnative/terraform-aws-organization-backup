@@ -4,17 +4,17 @@
 
 module "organization_backup" {
   providers = {
-    aws = aws
-    aws.management = aws.management
+    aws                = aws
+    aws.management     = aws.management
     aws.external_vault = aws # not needed since enable_external_vault set false
-   }
+  }
 
   source = "./modules/aws-organization-backup"
 
-  name = "<customer>"
+  name                     = "<customer>"
   backup_vault_kms_key_arn = module.kms_backup_vault.kms_key_arn
-  enable_external_vault = false
-  immutable_vault = true
+  enable_external_vault    = false
+  immutable_vault          = true
 }
 
 resource "aws_iam_service_linked_role" "backup_service_linked_role" {
@@ -27,7 +27,7 @@ module "kms_backup_vault" {
 
   providers = {
     aws = aws
-   }
+  }
 
   name = "<customer>_backup_vault"
 }

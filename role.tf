@@ -1,7 +1,6 @@
 # replaces AWSBackupDefaultServiceRole
 module "iam_role" {
-  # source = "git@github.com:TechNative-B-V/modules-aws.git//identity_and_access_management/iam_role?ref=v1.1.3"
-  source = "../identity_and_access_management/iam_role/"
+  source = "git@github.com:wearetechnative/terraform-aws-iam-role.git?ref=v1.0.0"
 
   role_name = "AWSBackup_${var.name}"
   role_path = "/AWSBackup/"

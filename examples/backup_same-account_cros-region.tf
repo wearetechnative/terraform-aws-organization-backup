@@ -22,13 +22,13 @@ resource "aws_iam_service_linked_role" "backup_service_linked_role" {
 }
 
 module "kms_backup_vault" {
-  source = "../../modules/kms"
+  source = "git@github.com:wearetechnative/terraform-aws-kms.git?ref=v1.0.0"
 
   name = "${var.name}_backup_vault"
 }
 
 module "kms_backup_vault_external" {
-  source = "../../modules/kms"
+  source = "git@github.com:wearetechnative/terraform-aws-kms.git?ref=v1.0.0"
 
   providers = {
     aws = aws.external_backup

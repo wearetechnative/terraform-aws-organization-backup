@@ -96,7 +96,7 @@ Example below with KMS grant.
 ```ruby
 resource "aws_kms_grant" "s3_appdata" {
   name              = "aws_backup_${var.name}_s3_appdata"
-  key_id            = data.terraform_remote_state.ddgcstack.outputs.ddgcstack_kms_key_arn
+  key_id            = data.terraform_remote_state.acme.outputs.acme_kms_key_arn
   grantee_principal = module.organization_backup.backup_role_arn
   operations        = ["Decrypt", "DescribeKey"]
 }
@@ -107,7 +107,7 @@ resource "aws_kms_grant" "s3_appdata" {
 ```ruby
 resource "aws_kms_grant" "s3_appdata" {
   name              = "aws_backup_${var.name}_s3_appdata"
-  key_id            = data.terraform_remote_state.ddgcstack.outputs.ddgcstack_kms_key_arn
+  key_id            = data.terraform_remote_state.acme.outputs.acme_kms_key_arn
   grantee_principal = module.organization_backup.backup_role_arn
 
   operations        = ["DescribeKey", "Decrypt", "ReEncryptFrom", "ReEncryptTo", "CreateGrant", "RetireGrant"]

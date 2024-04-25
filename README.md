@@ -4,11 +4,7 @@
 
 This module implements a standard `AWS Backup` setup using `AWS Organizaion` backup policies for enforcement.
 
-Any supported and enabled resource with tag `BackupEnabled` and value `True` will be included.
-
 The module is currently tested for all scenarios except cross-region and cross-account combined. This probably just works or should be easy to implement.
-
-All modules should work but currently only EBS, RDS and S3 are tested. EFS, Virtual Machines and DynamoDB might need some work [because KMS is supported](https://docs.aws.amazon.com/aws-backup/latest/devguide/encryption.html).
 
 *** Make sure you GUARD or BACKUP your `KMS CMK` keys as `AWS Backup` mostly uses the [original resource KMS CMK key](https://docs.aws.amazon.com/aws-backup/latest/devguide/encryption.html) for encrypting the backups. The best approach is to block `kms:ScheduleKeyDeletion` in an SCP.
 
@@ -18,11 +14,6 @@ Simultaneous cross-region and cross-account is [not supported](https://docs.aws.
 
 ## How does it work
 
-AWS Backup works by copying targeted resource's data into s3 storage on a schedule.
-You can select which resources you want to back up with the use of tags. (explained further in ./plan.md).
-The data can be backed up to other regions or AWS accounts.
-AWS Backup integrates with other AWS services, such as AWS Identity and Access Management (IAM) for authentication and Amazon CloudWatch for logging and monitoring.
-
 ### Known (major) limitations
 
 The module is currently tested for all scenarios except cross-region and cross-account combined. This probably just works or should be easy to implement.
@@ -31,7 +22,7 @@ The module is currently tested for all scenarios except cross-region and cross-a
 
 - This module requires at least the following Terraform configuration on the management account.
 
-```json
+```ruby
 resource "aws_organizations_organization" "this" {
   aws_service_access_principals = [ "backup.amazonaws.com" ]
 
@@ -52,7 +43,7 @@ This requirement can be automated once Terraform `aws_kms_grant` supports servic
 
 - All accounts with vaults must have the `AWSServiceRoleForBackup` service linked role. This can be created / imported in Terraform with:
 
-```json
+```ruby
 resource "aws_iam_service_linked_role" "backup_service_linked_role" {
   aws_service_name = "backup.amazonaws.com"
 }
@@ -62,7 +53,7 @@ resource "aws_iam_service_linked_role" "backup_service_linked_role" {
 
 - Enable all resources for *each region* in the *management account* to make sure that resources are included.
 
-```json
+```ruby
 resource "aws_backup_region_settings" "this" {
   resource_type_opt_in_preference = {
     "Aurora" = true,
@@ -96,7 +87,7 @@ Example below with KMS grant.
 ```ruby
 resource "aws_kms_grant" "s3_appdata" {
   name              = "aws_backup_${var.name}_s3_appdata"
-  key_id            = data.terraform_remote_state.acme.outputs.acme_kms_key_arn
+  key_id            = data.terraform_remote_state.ddgcstack.outputs.ddgcstack_kms_key_arn
   grantee_principal = module.organization_backup.backup_role_arn
   operations        = ["Decrypt", "DescribeKey"]
 }
@@ -107,7 +98,7 @@ resource "aws_kms_grant" "s3_appdata" {
 ```ruby
 resource "aws_kms_grant" "s3_appdata" {
   name              = "aws_backup_${var.name}_s3_appdata"
-  key_id            = data.terraform_remote_state.acme.outputs.acme_kms_key_arn
+  key_id            = data.terraform_remote_state.ddgcstack.outputs.ddgcstack_kms_key_arn
   grantee_principal = module.organization_backup.backup_role_arn
 
   operations        = ["DescribeKey", "Decrypt", "ReEncryptFrom", "ReEncryptTo", "CreateGrant", "RetireGrant"]
@@ -140,54 +131,8 @@ To use this module see the ./examples directory for the 3 main supported and tes
 
 ## Future work
 
-- Combined  cross-account and cross-region. Probably requires seperate KMS keys.
+- Combined cross-account and cross-region. Probably requires seperate KMS keys.
 - Automatic handling of setting up KMS access under different configurations (e.g. KMS per vault location, KMS shared in source vault account, KMS shared in destination vault account).
 
 <!-- BEGIN_TF_DOCS -->
-## Providers
-
-| Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >4.27 |
-| <a name="provider_aws.external_vault"></a> [aws.external\_vault](#provider\_aws.external\_vault) | >4.27 |
-| <a name="provider_aws.management"></a> [aws.management](#provider\_aws.management) | >4.27 |
-
-## Modules
-
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_backup_vault"></a> [backup\_vault](#module\_backup\_vault) | ./backup_vault | n/a |
-| <a name="module_backup_vault_external"></a> [backup\_vault\_external](#module\_backup\_vault\_external) | ./backup_vault | n/a |
-| <a name="module_iam_role"></a> [iam\_role](#module\_iam\_role) | ../identity_and_access_management/iam_role/ | n/a |
-
-## Resources
-
-| Name | Type |
-|------|------|
-| [aws_backup_global_settings.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/backup_global_settings) | resource |
-| [aws_backup_vault_policy.source_account_to_destination_account_vault_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/backup_vault_policy) | resource |
-| [aws_kms_grant.kms_grant_external_vault](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_grant) | resource |
-| [aws_organizations_policy.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/organizations_policy) | resource |
-| [aws_organizations_policy_attachment.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/organizations_policy_attachment) | resource |
-| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
-| [aws_caller_identity.external_vault](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
-| [aws_default_tags.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/default_tags) | data source |
-| [aws_iam_policy_document.source_account_to_destination_account_vault_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
-
-## Inputs
-
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_backup_vault_kms_key_arn"></a> [backup\_vault\_kms\_key\_arn](#input\_backup\_vault\_kms\_key\_arn) | Backup vault KMS key ARN to be used for internal and optional external vault. Required. | `string` | n/a | yes |
-| <a name="input_enable_external_vault"></a> [enable\_external\_vault](#input\_enable\_external\_vault) | This will create a mimic vault in the account provided by `aws.external_vault`. If set to false then `aws.external_vault` can be set to any account as it's not used. | `bool` | n/a | yes |
-| <a name="input_external_backup_vault_kms_key_arn"></a> [external\_backup\_vault\_kms\_key\_arn](#input\_external\_backup\_vault\_kms\_key\_arn) | External backup vault KMS key ARN to be used for external vault. If not set then value taken from `var.backup_vault_kms_key_arn` is used. This variable must be set to support cross-region setups. | `string` | `null` | no |
-| <a name="input_immutable_vault"></a> [immutable\_vault](#input\_immutable\_vault) | Make the local and (optional) external vault immutable to prevent deletion. Immutable vaults can never be deleted after 90 days. | `bool` | `true` | no |
-| <a name="input_name"></a> [name](#input\_name) | Name for several resources to allow this module to be reused within the same account. Must also be unique for any vaults in external accounts. Required | `string` | n/a | yes |
-
-## Outputs
-
-| Name | Description |
-|------|-------------|
-| <a name="output_backup_role_arn"></a> [backup\_role\_arn](#output\_backup\_role\_arn) | n/a |
 <!-- END_TF_DOCS -->

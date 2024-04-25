@@ -4,17 +4,17 @@
 
 module "organization_backup" {
   providers = {
-    aws                = aws
-    aws.management     = aws.management
+    aws = aws
+    aws.management = aws.management
     aws.external_vault = aws.external_backup
-  }
+   }
 
   source = "./modules/aws-organization-backup"
 
-  name                     = "<customer>"
+  name = "<customer>"
   backup_vault_kms_key_arn = module.kms_backup_vault.kms_key_arn
-  enable_external_vault    = true
-  immutable_vault          = true
+  enable_external_vault = true
+  immutable_vault = true
 }
 
 resource "aws_iam_service_linked_role" "backup_service_linked_role" {
@@ -22,14 +22,14 @@ resource "aws_iam_service_linked_role" "backup_service_linked_role" {
 }
 
 module "kms_backup_vault" {
-
+  # source = "git@github.com:TechNative-B-V/modules-aws.git//kms?ref=61e551bab2bc56a134b57365dcc8670f362881ce"
   source = "./modules/kms"
 
   providers = {
     aws = aws.external_backup
-  }
+   }
 
-  name                      = "<customer>_backup_vault"
+  name = "<customer>_backup_vault"
   resource_policy_additions = jsondecode(data.aws_iam_policy_document.backup_vault_kms_external_account.json)
 }
 

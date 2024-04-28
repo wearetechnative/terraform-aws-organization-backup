@@ -10,7 +10,7 @@ If you get the below error and you have external vault enabled in the module thi
 
 ## IAM Service Linked Role Error
 
-![service_linked_role](service_linked_role.png)
+![service_linked_role](images/service_linked_role.png)
 
 If you have already tested or used the AWS Backup Service, then most likely AWS has already created this service linked role for you automatically. Then there is no need to use the below resource. Just comment it out and run the module once more.
 

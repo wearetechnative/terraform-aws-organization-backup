@@ -1,4 +1,4 @@
-# Terraform AWS [aws-organization-backup]
+# Terraform AWS [aws-organization-backup] ![](https://img.shields.io/github/actions/workflow/status/wearetechnative/terraform-aws-organization-backup/tflint.yaml?branch=main&style=plastic)
 
 <!-- SHIELDS -->
 

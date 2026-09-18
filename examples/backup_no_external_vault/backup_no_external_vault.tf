@@ -9,7 +9,7 @@ module "organization_backup" {
     aws.external_vault = aws # not needed since enable_external_vault set false
   }
 
-  source = "./modules/aws-organization-backup"
+  source = "../../"
 
   name                     = "<customer>"
   backup_vault_kms_key_arn = module.kms_backup_vault.kms_key_arn

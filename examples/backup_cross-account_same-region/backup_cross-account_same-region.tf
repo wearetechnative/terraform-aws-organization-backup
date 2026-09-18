@@ -9,7 +9,7 @@ module "organization_backup" {
     aws.external_vault = aws.external_backup
   }
 
-  source = "./modules/aws-organization-backup"
+  source = "../../"
 
   name                     = "<customer>"
   backup_vault_kms_key_arn = module.kms_backup_vault.kms_key_arn
@@ -23,7 +23,7 @@ resource "aws_iam_service_linked_role" "backup_service_linked_role" {
 
 module "kms_backup_vault" {
 
-  source = "./modules/kms"
+  source = "github.com/wearetechnative/terraform-aws-kms.git?ref=96e823e21f41ddcb29c9d9ed04a7f65e74cbac74"
 
   providers = {
     aws = aws.external_backup

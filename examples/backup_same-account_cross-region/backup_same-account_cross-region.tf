@@ -8,7 +8,7 @@ module "organization_backup" {
     aws.external_vault = aws.external_backup
   }
 
-  source = "../../modules/aws-organization-backup"
+  source = "../../"
 
   name                              = var.name
   backup_vault_kms_key_arn          = module.kms_backup_vault.kms_key_arn

@@ -1,4 +1,4 @@
-# Terraform AWS [aws-organization-backup]
+# Terraform AWS [aws-organization-backup] ![](https://img.shields.io/github/actions/workflow/status/wearetechnative/terraform-aws-organization-backup/lint.yaml?branch=main&style=plastic&label=lint) ![](https://img.shields.io/github/actions/workflow/status/wearetechnative/terraform-aws-organization-backup/security-scan.yaml?branch=main&style=plastic&label=security)
 
 <!-- SHIELDS -->
 

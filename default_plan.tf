@@ -18,7 +18,7 @@ locals {
               "delete_after_days" : { "@@assign" : "14" } # 1 week + 3 day margin
             } }, length(module.backup_vault_external) > 0 ? {
             "copy_actions" : {
-              "${module.backup_vault_external[0].backup_vault_arn}" : {
+              (module.backup_vault_external[0].backup_vault_arn) : {
                 "target_backup_vault_arn" : {
                   "@@assign" : module.backup_vault_external[0].backup_vault_arn
                 },
@@ -43,7 +43,7 @@ locals {
               "delete_after_days" : { "@@assign" : "42" } # 1 month + 1 week margin
             } }, length(module.backup_vault_external) > 0 ? {
             "copy_actions" : {
-              "${module.backup_vault_external[0].backup_vault_arn}" : {
+              (module.backup_vault_external[0].backup_vault_arn) : {
                 "target_backup_vault_arn" : {
                   "@@assign" : module.backup_vault_external[0].backup_vault_arn
                 },
@@ -68,7 +68,7 @@ locals {
               "delete_after_days" : { "@@assign" : "420" } # 1 year + 1 month margin
             } }, length(module.backup_vault_external) > 0 ? {
             "copy_actions" : {
-              "${module.backup_vault_external[0].backup_vault_arn}" : {
+              (module.backup_vault_external[0].backup_vault_arn) : {
                 "target_backup_vault_arn" : {
                   "@@assign" : module.backup_vault_external[0].backup_vault_arn
                 },
